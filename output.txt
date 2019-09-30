@@ -1,0 +1,148 @@
+Layer BITCOIN:
+	Packet magic: 0xf9beb4d9
+	Command name: addr
+	Payload Length: 61
+	Payload checksum: 0xb85e2d00
+	Address message
+	Count: 2
+	Address: c5b7915d0d0400000000000000000000000000000000ffff\xe2\x80\xa6
+	Node services: 0x000000000000040d
+	.... .... .... .... .... .... .... ...1 = Network node: Set
+	Node address: ::ffff:91.204.99.178
+	Node port: 8333
+	Address timestamp: Sep 30, 2019 17:07:33.000000000 Korea Standard Time
+	Address: 11b8915d0d0400000000000000000000000000000000ffff\xe2\x80\xa6
+	Node services: 0x000000000000040d
+	.... .... .... .... .... .... .... ...1 = Network node: Set
+	Node address: ::ffff:80.114.139.249
+	Node port: 8333
+	Address timestamp: Sep 30, 2019 17:08:49.000000000 Korea Standard Time
+Layer BITCOIN:
+	Packet magic: 0xf9beb4d9
+	Command name: addr
+	Payload Length: 31
+	Payload checksum: 0x40669d7a
+	Address message
+	Count: 1
+	Address: 13b9915d0d0000000000000000000000000000000000ffff\xe2\x80\xa6
+	Node services: 0x000000000000000d
+	.... .... .... .... .... .... .... ...1 = Network node: Set
+	Node address: ::ffff:47.244.111.128
+	Node port: 8333
+	Address timestamp: Sep 30, 2019 17:13:07.000000000 Korea Standard Time
+Layer BITCOIN:
+	Packet magic: 0xf9beb4d9
+	Command name: addr
+	Payload Length: 31
+	Payload checksum: 0x4768c38f
+	Address message
+	Count: 1
+	Address: 58b9915d0d040000000000002001067c2b5c010102163eff\xe2\x80\xa6
+	Node services: 0x000000000000040d
+	.... .... .... .... .... .... .... ...1 = Network node: Set
+	Node address: 2001:67c:2b5c:101:216:3eff:fea3:5234
+	Node port: 8333
+	Address timestamp: Sep 30, 2019 17:14:16.000000000 Korea Standard Time
+Layer BITCOIN:
+	Packet magic: 0xf9beb4d9
+	Command name: addr
+	Payload Length: 91
+	Payload checksum: 0xe00f05d0
+	Address message
+	Count: 3
+	Address: 7bb8915d0d0000000000000000000000000000000000ffff\xe2\x80\xa6
+	Node services: 0x000000000000000d
+	.... .... .... .... .... .... .... ...1 = Network node: Set
+	Node address: ::ffff:185.18.4.96
+	Node port: 8333
+	Address timestamp: Sep 30, 2019 17:10:35.000000000 Korea Standard Time
+	Address: b3b9915d0d000000000000002a001370812876ca439c7334\xe2\x80\xa6
+	Address: 1db9915d0d0400000000000000000000000000000000ffff\xe2\x80\xa6
+	Node services: 0x000000000000000d
+	Node services: 0x000000000000040d
+	.... .... .... .... .... .... .... ...1 = Network node: Set
+	.... .... .... .... .... .... .... ...1 = Network node: Set
+	Node address: 2a00:1370:8128:76ca:439c:7334:ac54:e096
+	Node address: ::ffff:88.209.114.156
+	Node port: 8333
+	Node port: 8333
+	Address timestamp: Sep 30, 2019 17:15:47.000000000 Korea Standard Time
+	Address timestamp: Sep 30, 2019 17:13:17.000000000 Korea Standard Time
+Layer BITCOIN:
+	Packet magic: 0xf9beb4d9
+	Command name: addr
+	Payload Length: 31
+	Payload checksum: 0xa8224172
+	Address message
+	Count: 1
+	Address: d3b9915d0d040000000000002a0104f8013b2ecd00000000\xe2\x80\xa6
+	Node services: 0x000000000000040d
+	.... .... .... .... .... .... .... ...1 = Network node: Set
+	Node address: 2a01:4f8:13b:2ecd::2
+	Node port: 8333
+	Address timestamp: Sep 30, 2019 17:16:19.000000000 Korea Standard Time
+Layer BITCOIN:
+	Packet magic: 0xf9beb4d9
+	Command name: addr
+	Payload Length: 61
+	Payload checksum: 0x77cf9bd5
+	Address message
+	Count: 2
+	Address: 09b8915d0d0000000000000000000000000000000000ffff\xe2\x80\xa6
+	Node services: 0x000000000000000d
+	.... .... .... .... .... .... .... ...1 = Network node: Set
+	Node address: ::ffff:172.198.100.17
+	Node port: 8333
+	Address timestamp: Sep 30, 2019 17:08:41.000000000 Korea Standard Time
+	Address: b5b8915d0d0000000000000000000000000000000000ffff\xe2\x80\xa6
+	Node services: 0x000000000000000d
+	.... .... .... .... .... .... .... ...1 = Network node: Set
+	Node address: ::ffff:14.157.23.12
+	Node port: 8333
+	Address timestamp: Sep 30, 2019 17:11:33.000000000 Korea Standard Time
+Layer BITCOIN:
+	Packet magic: 0xf9beb4d9
+	Command name: addr
+	Payload Length: 31
+	Payload checksum: 0x366c9e4c
+	Address message
+	Count: 1
+	Address: 49bb915d0d0400000000000000000000000000000000ffff\xe2\x80\xa6
+	Node services: 0x000000000000040d
+	.... .... .... .... .... .... .... ...1 = Network node: Set
+	Node address: ::ffff:88.24.28.92
+	Node port: 8333
+	Address timestamp: Sep 30, 2019 17:22:33.000000000 Korea Standard Time
+Layer BITCOIN:
+	Packet magic: 0xf9beb4d9
+	Command name: addr
+	Payload Length: 31
+	Payload checksum: 0x5561f923
+	Address message
+	Count: 1
+	Address: a9b9915d0d000000000000002a010c2234388f003c1e986c\xe2\x80\xa6
+	Node services: 0x000000000000000d
+	.... .... .... .... .... .... .... ...1 = Network node: Set
+	Node address: 2a01:c22:3438:8f00:3c1e:986c:dbc4:5c8f
+	Node port: 8333
+	Address timestamp: Sep 30, 2019 17:15:37.000000000 Korea Standard Time
+Layer BITCOIN:
+	Packet magic: 0xf9beb4d9
+	Command name: addr
+	Payload Length: 61
+	Payload checksum: 0x76d699d1
+	Address message
+	Count: 2
+	Address: ffbb915d0d0400000000000000000000000000000000ffff\xe2\x80\xa6
+	Node services: 0x000000000000040d
+	.... .... .... .... .... .... .... ...1 = Network node: Set
+	Node address: ::ffff:99.185.130.208
+	Node port: 8333
+	Address timestamp: Sep 30, 2019 17:25:35.000000000 Korea Standard Time
+	Address: ffbb915d0d0400000000000000000000000000000000ffff\xe2\x80\xa6
+	Node services: 0x000000000000040d
+	.... .... .... .... .... .... .... ...1 = Network node: Set
+	Node address: ::ffff:81.158.104.141
+	Node port: 8333
+	Address timestamp: Sep 30, 2019 17:25:35.000000000 Korea Standard Time
+::ffff:46.105.116.198333::ffff:47.56.98.858333::ffff:35.187.214.1308333::ffff:5.189.191.158333::ffff:104.198.122.1158333
