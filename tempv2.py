@@ -15,9 +15,6 @@ PORT = 8333
 START_TIME = time.time()
 END_TIME = time.time() + 100 # we wish to run the script for 100s
 
-#constant that we want for addr response
-ADDR_RESP_HEX = 'f9beb4d9616464720000000000000000' # hex code concatenated from magic code for mainnet + addr command + zero paddings
-
 #logging configuration
 logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s', level=logging.INFO, filename='peerlog.txt', datefmt='%Y-%m-%d %H:%M:%S')
 
@@ -72,25 +69,30 @@ capture = pyshark.LiveCapture(interface='\\Device\\NPF_{9342EE7E-9981-4554-87AE-
 
 #send version message
 sock.send(create_version_message())
-print(sock.recv(1024))
+print("Version message created")
+sock.recv(1024)
 time.sleep(2)
 
 #send verack message to seed node
 sock.send(create_verack_message())
-print(sock.recv(1024))
+print("Verack message created")
+sock.recv(1024)
 time.sleep(2)
 
 #send getaddr message
-while(time.time() < END_TIME):
-	sock.send(create_getaddr_message())
-	capture.sniff(timeout=10)
-	for pkt in capture:
-		if(pkt.bitcoin.command == 'addr'):
-			print(pkt.bitcoin.pretty_print())
-			print("--------------------------------------------------")
-			addrport = str(pkt.bitcoin.address_address) + '\t' + str(pkt.bitcoin.address_port)
-			print(addrport)
-			with open('output.txt', 'a') as f:
-				f.write(addrport)
+sock.send(create_getaddr_message())
+capture.sniff(timeout=10)
+for pkt in capture:
+	if(pkt.bitcoin.command == 'addr'):
+		addresses = list(pkt.bitcoin.address_address.all_fields)
+		ports = list(pkt.bitcoin.address_port.all_fields)
+		print("-------------------------------------------------------")
+		#addrport = str(pkt.bitcoin.address_address) + '\t' + str(pkt.bitcoin.address_port)
+		#print(addrport)
+		with open('output.txt', 'a') as f:
+			for i,j in zip(addresses, ports):
+				print(str(i) + "\t\t" + str(j) + "\n")
+				f.write(str(i) + "\t" + str(j) + "\n")
 
-	time.sleep(10)
+time.sleep(10)
+capture.close()
