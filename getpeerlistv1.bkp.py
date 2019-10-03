@@ -57,7 +57,6 @@ def create_getaddr_message():
 #create a capture pyshark object
 #yo chai host sanga ko connection
 def sniff_addr_packets(host, port):
-	print("Attempting connection to " + host + " at port " + str(port))
 	pkt_cnt = 0;
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock.connect((host,port))
@@ -84,14 +83,14 @@ def sniff_addr_packets(host, port):
 
 	#refer to the global nodelist dictionary
 	global nodelist
-	start_time = time.time()
-	print("Start Time: " + str(start_time))
-	end_time = time.time() + 125 # we want to look up a node upto 125 seconds to see if it contains a list of nodes
-	print("Capture will end prolly before: " + str(end_time))
+
 	capture.sniff(timeout=20)
+	#start_time = time.time()
 	for pkt in capture:
+		print("Capturing Pakets!")
+		# if(time.time() > start_time + 4):
+		# 	break;
 		if(pkt.bitcoin.command == 'addr'):
-			#increment the packet_count
 			pkt_cnt += int(pkt.bitcoin.addr_count)
 			addresses = list(pkt.bitcoin.address_address.all_fields)
 			ports = list(pkt.bitcoin.address_port.all_fields)
@@ -110,58 +109,45 @@ def sniff_addr_packets(host, port):
 
 					#add the IP address to the nodelist dictionary if it has not been added yet
 					if formattedIP not in nodelist:
-						nodelist[formattedIP] = int(formattedPort)
+						nodelist[formattedIP] = formattedPort
 					print(f"IP: {formattedIP} \t\t Port: {formattedPort} \n")
 					f.write(formattedIP + "\t" + formattedPort + "\n")
-
 				#because the capture was proceeding async, and we want only 1000 IPs from a single node, so we explicitly stop when that condition meets
-				if ((pkt_cnt >= 1000)):
+				if(pkt_cnt >= 1000):
 					capture.close()
-					# break
 		else:
 			continue
 	capture.close()
-	print("No further address packets received in the time limit")
-	print("End Time: " + str(time.time()))
-	# capture.close()
+
+
+def set_timer():
+	#define starting time and ending time
+	START_TIME = time.time()
+	END_TIME = time.time() + 300 # we wish to run the script for 5 mins (300s)
+
 
 #main boilerplate syntax
 if __name__ == '__main__':
 	#maintain a dictionary to store found IPs mapping to their port number
 	global nodelist
-	nodelist = {'seed.bitnodes.io':8333}
-	nodelistread = []
-	
-	#define ending time
-	PROG_END_TIME = time.time() + 600 # we wish to run the script for 10 mins (600s)
+	nodelist = {}
+	global childThreadID
+	childThreadID = 0 #assign it as zero initially
+	#define starting time and ending time
+	START_TIME = time.time()
+	END_TIME = time.time() + 300 # we wish to run the script for 5 mins (300s)
 
 	
-	# childThread = threading.Thread(target=sniff_addr_packets,args=("seed.bitnodes.io",8333,))
-	# childThread.daemon = True
-	# childThread.start()
-	# #sniff_addr_packets("seed.bitnodes.io",8333)
-	# print(threading.active_count())
+	childThread = threading.Thread(target=sniff_addr_packets,args=("seed.bitnodes.io",8333,))
+	childThread.daemon = True
+	childThread.start()
+	#sniff_addr_packets("seed.bitnodes.io",8333)
+	print(threading.active_count())
 
-	# # while(time.time() < END_TIME):
-	# # 	pass
+	# while(time.time() < END_TIME):
+	# 	pass
 	
-	# childThread.join()
+	childThread.join()
 	
-	# print("Exited the loop!")
-
+	print("Exited the loop!")
 	print(nodelist)
-	while(time.time() < PROG_END_TIME):
-		print("I am here!")
-		time.sleep(2)
-		for k,v in nodelist.copy().items():
-			if k not in nodelistread:
-				childThread = threading.Thread(target=sniff_addr_packets, args=(k,v,))
-				childThread.daemon = True
-				childThread.start()
-				print(threading.active_count())
-				childThread.join()
-				nodelistread.append(k)
-			else:
-				continue
-	print("Data collected over 10 mins successfully")
-	print("Length of nodelist: " + str(len(nodelist)))
