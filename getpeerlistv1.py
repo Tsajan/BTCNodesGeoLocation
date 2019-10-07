@@ -52,10 +52,8 @@ def create_getaddr_message():
 	length = struct.pack("I", len(payload))
 	checksum = hashlib.sha256(hashlib.sha256(payload).digest()).digest()[:4]
 	return magic + command + length + checksum + payload
-##upto here
 
 #create a capture pyshark object
-#yo chai host sanga ko connection
 def sniff_addr_packets(host, port):
 	print("Attempting connection to " + host + " at port " + str(port))
 	pkt_cnt = 0;
@@ -65,13 +63,13 @@ def sniff_addr_packets(host, port):
 	
 	#send version message
 	sock.send(create_version_message(host))
-	time.sleep(2)
+	time.sleep(4)
 	print("Version Message Sent Successfully")
 	sock.recv(1024)
 
 	#send verack message to seed node
 	sock.send(create_verack_message())
-	time.sleep(2)
+	time.sleep(4)
 	print("Verack Message Sent Successfully")
 	sock.recv(1024)
 
@@ -81,7 +79,7 @@ def sniff_addr_packets(host, port):
 	#send getaddr message
 	sock.send(create_getaddr_message())
 	print("GetAddr Message Sent Successfully")
-
+	
 	#refer to the global nodelist dictionary
 	global nodelist
 	start_time = time.time()
@@ -116,14 +114,23 @@ def sniff_addr_packets(host, port):
 
 				#because the capture was proceeding async, and we want only 1000 IPs from a single node, so we explicitly stop when that condition meets
 				if ((pkt_cnt >= 1000)):
+					print("Closing Capture")
 					capture.close()
 					# break
+				if time.time() > end_time:
+					print("Closing Capture")
+					capture.close()
 		else:
 			continue
 	capture.close()
 	print("No further address packets received in the time limit")
 	print("End Time: " + str(time.time()))
-	# capture.close()
+	
+	#close the socket connection
+	sock.close()
+
+	print("Sleeping now for 80 seconds")
+	time.sleep(80)
 
 #main boilerplate syntax
 if __name__ == '__main__':
@@ -135,22 +142,9 @@ if __name__ == '__main__':
 	#define ending time
 	PROG_END_TIME = time.time() + 600 # we wish to run the script for 10 mins (600s)
 
-	
-	# childThread = threading.Thread(target=sniff_addr_packets,args=("seed.bitnodes.io",8333,))
-	# childThread.daemon = True
-	# childThread.start()
-	# #sniff_addr_packets("seed.bitnodes.io",8333)
-	# print(threading.active_count())
-
-	# # while(time.time() < END_TIME):
-	# # 	pass
-	
-	# childThread.join()
-	
-	# print("Exited the loop!")
-
 	print(nodelist)
-	while(time.time() < PROG_END_TIME):
+	# while(time.time() < PROG_END_TIME):
+	while(True):
 		print("I am here!")
 		time.sleep(2)
 		for k,v in nodelist.copy().items():
@@ -158,10 +152,13 @@ if __name__ == '__main__':
 				childThread = threading.Thread(target=sniff_addr_packets, args=(k,v,))
 				childThread.daemon = True
 				childThread.start()
-				print(threading.active_count())
+				print("Active threads: " + str(threading.active_count()))
 				childThread.join()
 				nodelistread.append(k)
 			else:
 				continue
+
+		if(len(nodelist) == len(nodelistread)):
+			break
 	print("Data collected over 10 mins successfully")
 	print("Length of nodelist: " + str(len(nodelist)))
