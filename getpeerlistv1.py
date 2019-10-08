@@ -53,8 +53,23 @@ def create_getaddr_message():
 	checksum = hashlib.sha256(hashlib.sha256(payload).digest()).digest()[:4]
 	return magic + command + length + checksum + payload
 
+#check if ipv4 or ip6 addresses. disallow ipv6 addresses
+def check_host_family(host, port):
+	assert (port is not None), "Port value not set"
+	if(':' in host):
+		print("Given host is a IPv6 address, passing over")
+		pass
+	else:
+		sniff_addr_packets(host, port)
+
+
 #create a capture pyshark object
 def sniff_addr_packets(host, port):
+
+	#early sleep before resuming connection
+	print("Sleeping now for 20 seconds")
+	time.sleep(20)
+
 	print("Attempting connection to " + host + " at port " + str(port))
 	pkt_cnt = 0;
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -63,34 +78,34 @@ def sniff_addr_packets(host, port):
 	
 	#send version message
 	sock.send(create_version_message(host))
-	time.sleep(4)
 	print("Version Message Sent Successfully")
 	sock.recv(1024)
 
 	#send verack message to seed node
 	sock.send(create_verack_message())
-	time.sleep(4)
 	print("Verack Message Sent Successfully")
 	sock.recv(1024)
 
 	#this line invokes tshark to capture packets asynchronously
 	capture = pyshark.LiveCapture(interface='\\Device\\NPF_{9342EE7E-9981-4554-87AE-06666A717864}',display_filter='bitcoin')
 	
-	#send getaddr message
-	sock.send(create_getaddr_message())
-	print("GetAddr Message Sent Successfully")
-	
-	#refer to the global nodelist dictionary
+	#refer to the global nodelist dictionary & global nodelistread list
 	global nodelist
+	global nodelistread
 	start_time = time.time()
 	print("Start Time: " + str(start_time))
 	end_time = time.time() + 125 # we want to look up a node upto 125 seconds to see if it contains a list of nodes
 	print("Capture will end prolly before: " + str(end_time))
-	capture.sniff(timeout=20)
+	capture.sniff_continuously()
+
+	sock.send(create_getaddr_message())
+	print("GetAddr Message Sent Successfully")
+	
 	for pkt in capture:
 		if(pkt.bitcoin.command == 'addr'):
 			#increment the packet_count
 			pkt_cnt += int(pkt.bitcoin.addr_count)
+			print("Packet Count" + str(pkt_cnt))
 			addresses = list(pkt.bitcoin.address_address.all_fields)
 			ports = list(pkt.bitcoin.address_port.all_fields)
 			print("-------------------------------------------------------")
@@ -109,8 +124,8 @@ def sniff_addr_packets(host, port):
 					#add the IP address to the nodelist dictionary if it has not been added yet
 					if formattedIP not in nodelist:
 						nodelist[formattedIP] = int(formattedPort)
+						f.write(formattedIP + "\t" + formattedPort + "\n")
 					print(f"IP: {formattedIP} \t\t Port: {formattedPort} \n")
-					f.write(formattedIP + "\t" + formattedPort + "\n")
 
 				#because the capture was proceeding async, and we want only 1000 IPs from a single node, so we explicitly stop when that condition meets
 				if ((pkt_cnt >= 1000)):
@@ -123,20 +138,19 @@ def sniff_addr_packets(host, port):
 		else:
 			continue
 	capture.close()
-	print("No further address packets received in the time limit")
+	print("Either packet count has reached its limit or has reached timeout")
 	print("End Time: " + str(time.time()))
 	
 	#close the socket connection
+	sock.shutdown(socket.SHUT_RDWR)
 	sock.close()
-
-	print("Sleeping now for 80 seconds")
-	time.sleep(80)
 
 #main boilerplate syntax
 if __name__ == '__main__':
 	#maintain a dictionary to store found IPs mapping to their port number
 	global nodelist
 	nodelist = {'seed.bitnodes.io':8333}
+	global nodelistread
 	nodelistread = []
 	
 	#define ending time
@@ -149,7 +163,7 @@ if __name__ == '__main__':
 		time.sleep(2)
 		for k,v in nodelist.copy().items():
 			if k not in nodelistread:
-				childThread = threading.Thread(target=sniff_addr_packets, args=(k,v,))
+				childThread = threading.Thread(target=check_host_family, args=(k,v,))
 				childThread.daemon = True
 				childThread.start()
 				print("Active threads: " + str(threading.active_count()))
