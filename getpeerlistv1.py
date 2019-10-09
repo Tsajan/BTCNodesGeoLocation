@@ -8,6 +8,7 @@ import pyshark
 import multiprocessing as mp
 import threading
 import os
+from pathlib import Path
 
 #logging configuration
 logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s', level=logging.INFO, filename='peerlog.txt', datefmt='%Y-%m-%d %H:%M:%S')
@@ -102,6 +103,7 @@ def sniff_addr_packets(host, port):
 	print("GetAddr Message Sent Successfully")
 	
 	for pkt in capture:
+		print("Waiting for packets!")
 		if(pkt.bitcoin.command == 'addr'):
 			#increment the packet_count
 			pkt_cnt += int(pkt.bitcoin.addr_count)
@@ -132,11 +134,12 @@ def sniff_addr_packets(host, port):
 					print("Closing Capture")
 					capture.close()
 					# break
-				if time.time() > end_time:
-					print("Closing Capture")
-					capture.close()
-		else:
-			continue
+		# stop packet capture if over 120 seconds from an IP
+		if (time.time() > end_time):
+			print("Closing Capture")
+			capture.close()
+
+		print("I am looping continuously in here!")
 	capture.close()
 	print("Either packet count has reached its limit or has reached timeout")
 	print("End Time: " + str(time.time()))
@@ -150,13 +153,28 @@ if __name__ == '__main__':
 	#maintain a dictionary to store found IPs mapping to their port number
 	global nodelist
 	nodelist = {'seed.bitnodes.io':8333}
+
 	global nodelistread
 	nodelistread = []
+
+	#check if there is already a file containing IP addresses
+	file_path = Path('output.txt')
+	if(file_path.exists()):
+		print("Output file exists already. Reading peer nodes list")
+		with open('output.txt','r') as fp:
+			for line in fp.readlines():
+				ip = line.split('\t')[0] #strip the ip from each line
+				port = line.split('\t')[-1] #strip the port from each line
+				nodelist[ip] = port
+				nodelistread.append(ip)
+	else:
+		print("Output file doesn't exist")
+
+	print(len(nodelist))
 	
 	#define ending time
 	PROG_END_TIME = time.time() + 600 # we wish to run the script for 10 mins (600s)
 
-	print(nodelist)
 	# while(time.time() < PROG_END_TIME):
 	while(True):
 		print("I am here!")
