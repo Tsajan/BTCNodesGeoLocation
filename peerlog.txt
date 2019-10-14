@@ -1,0 +1,25 @@
+2019-10-10 12:03:28 ERROR    Task exception was never retrieved
+future: <Task finished coro=<Capture.packets_from_tshark() done, defined at C:\Users\sajan\Anaconda3\lib\site-packages\pyshark\capture\capture.py:279> exception=TSharkCrashException('TShark seems to have crashed (retcode: 1). Try rerunning in debug mode [ capture_obj.set_debug() ] or try updating tshark.')>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\site-packages\pyshark\capture\capture.py", line 288, in packets_from_tshark
+    await self._go_through_packets_from_fd(tshark_process.stdout, packet_callback, packet_count=packet_count)
+  File "C:\Users\sajan\Anaconda3\lib\site-packages\pyshark\capture\capture.py", line 306, in _go_through_packets_from_fd
+    psml_structure=psml_struct)
+  File "C:\Users\sajan\Anaconda3\lib\site-packages\pyshark\capture\capture.py", line 366, in _get_packet_from_stream
+    new_data = await stream.read(self.DEFAULT_BATCH_SIZE)
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\streams.py", line 640, in read
+    await self._wait_for_data('read')
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\streams.py", line 473, in _wait_for_data
+    await self._waiter
+concurrent.futures._base.CancelledError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\site-packages\pyshark\capture\capture.py", line 293, in packets_from_tshark
+    await self.close_async()
+  File "C:\Users\sajan\Anaconda3\lib\site-packages\pyshark\capture\capture.py", line 441, in close_async
+    await self._cleanup_subprocess(process)
+  File "C:\Users\sajan\Anaconda3\lib\site-packages\pyshark\capture\capture.py", line 434, in _cleanup_subprocess
+    % process.returncode)
+pyshark.capture.capture.TSharkCrashException: TShark seems to have crashed (retcode: 1). Try rerunning in debug mode [ capture_obj.set_debug() ] or try updating tshark.

@@ -39,7 +39,7 @@ def geolocateip_using_ipstack(file_path):
 
     base_url = 'http://api.ipstack.com/'
 
-    for i in range(len(iplist)):
+    for i in range(10):
         ip = iplist[i]
         url = base_url + ip + '?access_key=' + IPSTACK_API_KEY
         resp = requests.get(url=url)
