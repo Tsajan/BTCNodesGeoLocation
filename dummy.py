@@ -10,6 +10,7 @@ import multiprocessing as mp
 import os
 from pathlib import Path
 import geoip2.database
+import errno
 from geoip2.errors import AddressNotFoundError
 
 #logging configuration
@@ -88,8 +89,8 @@ def sniff_addr_packets(host, port):
 		sock.connect((host,port))
 		conn_established = True
 		print("Socket Connection Established Successfully")
-	except socket.error as err:
-		print("Caught exception socket.error: %s" % err)
+	except (socket.error, ConnectionResetError) as err:
+		print("Caught exception: %s" % err)
 	
 	# refer to the global nodelist dictionary & global nodelistread list
 	global nodelist
@@ -101,12 +102,25 @@ def sniff_addr_packets(host, port):
 		# send version message
 		sock.send(create_version_message(host))
 		print("Version Message Sent Successfully")
-		sock.recv(1024)
 
+		try:
+			sock.recv(1024)
+		except socket.error as err:
+			if err.errno == errno.ECONNRESET:
+				print("Caught exception: %s" % err)
+				print("Connection Reset")
+				pass
+		
 		# send verack message to seed node
 		sock.send(create_verack_message())
 		print("Verack Message Sent Successfully")
-		sock.recv(1024)
+		try:
+			sock.recv(1024)
+		except socket.error as err:
+			if err.errno == errno.ECONNRESET:
+				print("Caught exception: %s" % err)
+				print("Connection Reset")
+				pass
 
 		# this line invokes tshark to capture packets asynchronously
 		capture = pyshark.LiveCapture(interface='\\Device\\NPF_{9342EE7E-9981-4554-87AE-06666A717864}',display_filter='bitcoin')
@@ -213,4 +227,8 @@ if __name__ == '__main__':
 				continue
 
 		if(len(nodelist) == len(nodelistread)):
+			break
+
+		#explicitly break the loop when the list of nodes found active in the last 24 hours is greater than 9500
+		if(len(nodelist) >= 9500):
 			break
