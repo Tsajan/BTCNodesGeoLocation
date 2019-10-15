@@ -106,22 +106,21 @@ def sniff_addr_packets(host, port):
 		try:
 			sock.recv(1024)
 		except socket.error as err:
-			if err.errno == errno.ECONNRESET:
+			if (err.errno == errno.ECONNRESET) or (err.errno == errno.ECONNABORTED):
 				print("Caught exception: %s" % err)
 				print("Connection Reset")
 				pass
-		
+			pass
 		# send verack message to seed node
 		sock.send(create_verack_message())
 		print("Verack Message Sent Successfully")
 		try:
 			sock.recv(1024)
 		except socket.error as err:
-			if err.errno == errno.ECONNRESET:
+			if (err.errno == errno.ECONNRESET) or (err.errno == errno.ECONNABORTED):
 				print("Caught exception: %s" % err)
-				print("Connection Reset")
 				pass
-
+			pass
 		# this line invokes tshark to capture packets asynchronously
 		capture = pyshark.LiveCapture(interface='\\Device\\NPF_{9342EE7E-9981-4554-87AE-06666A717864}',display_filter='bitcoin')
 
