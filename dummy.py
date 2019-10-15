@@ -1,5 +1,6 @@
 import socket
 import time
+import datetime
 import hashlib
 import struct
 import random
@@ -93,6 +94,7 @@ def sniff_addr_packets(host, port):
 	# refer to the global nodelist dictionary & global nodelistread list
 	global nodelist
 	global nodelistread
+	global CURRENT_TIME
 
 	# proceed only if socket connection was established
 	if(conn_established):
@@ -140,12 +142,19 @@ def sniff_addr_packets(host, port):
 						unformattedPort = str(j)
 						formattedPort = unformattedPort.strip('<').strip('>').split(' ')[-1]
 						
-
-						#add the IP address to the nodelist dictionary if it has not been added yet
-						if formattedIP not in nodelist:
+						#formatting the address timestamp of each peer
+						unformattedTS = str(y)
+						formattedTSString = unformattedTS.split('p:')[-1].split('.0')[0].strip(' ')
+						
+						#we define a variable age to look for only recent peers
+						uts = time.mktime(datetime.datetime.strptime(formattedTSString, "%b %d, %Y %H:%M:%S").timetuple())
+						age = int(CURRENT_TIME - uts)
+						
+						#add the IP address to the nodelist dictionary if it has not been added yet and if it's age in less than 24 hours
+						if (formattedIP not in nodelist) and (age <= 86400):
 							nodelist[formattedIP] = int(formattedPort)
 							f.write(formattedIP + "\t" + formattedPort + "\n")
-						print(f"IP: {formattedIP} \t\t Port: {formattedPort} \n")
+						print(f"IP: {formattedIP} \t\t Port: {formattedPort} \t\t Timestamp: {formattedTSString}\n")
 
 		print("Either packet count has reached its limit or has reached timeout")
 		print("End Time: " + str(time.time()))
@@ -172,6 +181,9 @@ if __name__ == '__main__':
 
 	global nodelistread
 	nodelistread = []
+
+	global CURRENT_TIME
+	CURRENT_TIME = time.time()
 
 	#check if there is already a file containing IP addresses
 	file_path = Path('dummy.txt')
