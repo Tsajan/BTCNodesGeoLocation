@@ -100,8 +100,13 @@ def sniff_addr_packets(host, port):
 	# proceed only if socket connection was established
 	if(conn_established):
 		# send version message
-		sock.send(create_version_message(host))
-		print("Version Message Sent Successfully")
+		try:
+			sock.send(create_version_message(host))
+			print("Version Message Sent Successfully")
+		except socket.error as err:
+			print("Caught exception: %s" % err)
+			pass
+		
 
 		try:
 			sock.recv(1024)
@@ -112,8 +117,13 @@ def sniff_addr_packets(host, port):
 				pass
 			pass
 		# send verack message to seed node
-		sock.send(create_verack_message())
-		print("Verack Message Sent Successfully")
+		try:
+			sock.send(create_verack_message())
+			print("Verack Message Sent Successfully")
+		except socket.error as err:
+			print("Caught exception: %s" % err)
+			pass
+		
 		try:
 			sock.recv(1024)
 		except socket.error as err:
@@ -124,8 +134,12 @@ def sniff_addr_packets(host, port):
 		# this line invokes tshark to capture packets asynchronously
 		capture = pyshark.LiveCapture(interface='\\Device\\NPF_{9342EE7E-9981-4554-87AE-06666A717864}',display_filter='bitcoin')
 
-		sock.send(create_getaddr_message())
-		print("GetAddr Message Sent Successfully")
+		try:
+			sock.send(create_getaddr_message())
+			print("GetAddr Message Sent Successfully")
+		except socket.error as err:
+			print("Caught exception: %s" % err)
+			pass
 		print("Waiting for packets!")
 		capture.sniff(timeout=30)
 		pkts = [pkt for pkt in capture._packets]
@@ -163,8 +177,8 @@ def sniff_addr_packets(host, port):
 						uts = time.mktime(datetime.datetime.strptime(formattedTSString, "%b %d, %Y %H:%M:%S").timetuple())
 						age = int(CURRENT_TIME - uts)
 						
-						#add the IP address to the nodelist dictionary if it has not been added yet and if it's age in less than 24 hours
-						if (formattedIP not in nodelist) and (age <= 86400):
+						#add the IP address to the nodelist dictionary if it has not been added yet and if it's age in less than 8 hours
+						if (formattedIP not in nodelist) and (age <= 28800):
 							nodelist[formattedIP] = int(formattedPort)
 							f.write(formattedIP + "\t" + formattedPort + "\n")
 						print(f"IP: {formattedIP} \t\t Port: {formattedPort} \t\t Timestamp: {formattedTSString}\n")
@@ -228,6 +242,6 @@ if __name__ == '__main__':
 		if(len(nodelist) == len(nodelistread)):
 			break
 
-		#explicitly break the loop when the list of nodes found active in the last 24 hours is greater than 9500
+		#explicitly break the loop when the list of nodes found active in the last 8 hours is greater than 9500
 		if(len(nodelist) >= 9500):
 			break
