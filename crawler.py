@@ -1,16 +1,19 @@
 import socket
 import time
+import datetime
 import hashlib
 import struct
 import random
 import logging
 import pyshark
 import multiprocessing as mp
-import threading
 import os
+import errno
 from pathlib import Path
 import geoip2.database
 from geoip2.errors import AddressNotFoundError
+import json
+from decimal import Decimal
 
 #logging configuration
 logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s', level=logging.INFO, filename='peerlog.txt', datefmt='%Y-%m-%d %H:%M:%S')
@@ -88,30 +91,57 @@ def sniff_addr_packets(host, port):
 		sock.connect((host,port))
 		conn_established = True
 		print("Socket Connection Established Successfully")
-	except socket.error as err:
-		print("Caught exception socket.error: %s" % err)
+	except (socket.error, ConnectionResetError) as err:
+		print("Caught exception: %s" % err)
 	
 	# refer to the global nodelist dictionary & global nodelistread list
 	global nodelist
 	global nodelistread
+	global CURRENT_TIME
 
 	# proceed only if socket connection was established
 	if(conn_established):
 		# send version message
-		sock.send(create_version_message(host))
-		print("Version Message Sent Successfully")
-		sock.recv(1024)
+		try:
+			sock.send(create_version_message(host))
+			print("Version Message Sent Successfully")
+		except socket.error as err:
+			print("Caught exception: %s" % err)
+			pass
+		
 
+		try:
+			sock.recv(1024)
+		except socket.error as err:
+			if (err.errno == errno.ECONNRESET) or (err.errno == errno.ECONNABORTED):
+				print("Caught exception: %s" % err)
+				print("Connection Reset")
+				pass
+			pass
 		# send verack message to seed node
-		sock.send(create_verack_message())
-		print("Verack Message Sent Successfully")
-		sock.recv(1024)
-
+		try:
+			sock.send(create_verack_message())
+			print("Verack Message Sent Successfully")
+		except socket.error as err:
+			print("Caught exception: %s" % err)
+			pass
+		
+		try:
+			sock.recv(1024)
+		except socket.error as err:
+			if (err.errno == errno.ECONNRESET) or (err.errno == errno.ECONNABORTED):
+				print("Caught exception: %s" % err)
+				pass
+			pass
 		# this line invokes tshark to capture packets asynchronously
 		capture = pyshark.LiveCapture(interface='\\Device\\NPF_{9342EE7E-9981-4554-87AE-06666A717864}',display_filter='bitcoin')
 
-		sock.send(create_getaddr_message())
-		print("GetAddr Message Sent Successfully")
+		try:
+			sock.send(create_getaddr_message())
+			print("GetAddr Message Sent Successfully")
+		except socket.error as err:
+			print("Caught exception: %s" % err)
+			pass
 		print("Waiting for packets!")
 		capture.sniff(timeout=30)
 		pkts = [pkt for pkt in capture._packets]
@@ -129,7 +159,7 @@ def sniff_addr_packets(host, port):
 				services = list(pkt.bitcoin.address_services.all_fields)
 				ts = list(pkt.bitcoin.addr_timestamp.all_fields)
 				
-				with open('output.txt', 'a') as f:
+				with open('nodelist.txt', 'a') as f:
 					for i,j,x,y in zip(addresses, ports, services, ts):
 						unformattedIP = str(i)
 						#remove unnecessary information provided by the 
@@ -141,12 +171,19 @@ def sniff_addr_packets(host, port):
 						unformattedPort = str(j)
 						formattedPort = unformattedPort.strip('<').strip('>').split(' ')[-1]
 						
-
-						#add the IP address to the nodelist dictionary if it has not been added yet
-						if formattedIP not in nodelist:
+						#formatting the address timestamp of each peer
+						unformattedTS = str(y)
+						formattedTSString = unformattedTS.split('p:')[-1].split('.0')[0].strip(' ')
+						
+						#we define a variable age to look for only recent peers
+						uts = time.mktime(datetime.datetime.strptime(formattedTSString, "%b %d, %Y %H:%M:%S").timetuple())
+						age = int(CURRENT_TIME - uts)
+						
+						#add the IP address to the nodelist dictionary if it has not been added yet and if it's age in less than 24 hours
+						if (formattedIP not in nodelist) and (age <= 86400):
 							nodelist[formattedIP] = int(formattedPort)
 							f.write(formattedIP + "\t" + formattedPort + "\n")
-						print(f"IP: {formattedIP} \t\t Port: {formattedPort} \n")
+						print(f"IP: {formattedIP} \t\t Port: {formattedPort} \t\t Timestamp: {formattedTSString}\n")
 
 		print("Either packet count has reached its limit or has reached timeout")
 		print("End Time: " + str(time.time()))
@@ -163,126 +200,125 @@ def sniff_addr_packets(host, port):
 	print("Nodes read: " + str(len(nodelistread)))
 
 def raw_geoip(address):
-    """
-    Resolves GeoIP data for the specified address using MaxMind databases.
-    """
-    country = None
-    iso_code = None
-    city = None
-    lat = 0.0
-    lng = 0.0
-    timezone = None
-    asn = None
-    org = None
+	"""Resolves GeoIP data for the specified address using MaxMind databases."""
+	country = None
+	iso_code = None
+	city = None
+	lat = 0.0
+	lng = 0.0
+	timezone = None
+	asn = None
+	org = None
 
-    #refer to the global GEOIP variables
-    global GEOIP_COUNTRY
-    global GEOIP_CITY
-    global GEOIP_ASN
-    
-    prec = Decimal('.000001')
+	#refer to the global GEOIP variables
+	global GEOIP_COUNTRY
+	global GEOIP_CITY
+	global GEOIP_ASN
 
-    if not address.endswith(".onion"):
-        try:
-            gcountry = GEOIP_COUNTRY.country(address)
-        except AddressNotFoundError:
-            pass
-        else:
-            iso_code = str(gcountry.country.iso_code)
-            country = str(gcountry.country.name)
+	prec = Decimal('.000001')
 
-        try:
-            gcity = GEOIP_CITY.city(address)
-        except AddressNotFoundError:
-            pass
-        else:
-            city = str(gcity.city.name).encode('utf-8')
-            if gcity.location.latitude is not None and \
-                    gcity.location.longitude is not None:
-                lat = float(Decimal(gcity.location.latitude).quantize(prec))
-                lng = float(Decimal(gcity.location.longitude).quantize(prec))
-            timezone = gcity.location.time_zone
+	if not address.endswith(".onion"):
+		try:
+			gcountry = GEOIP_COUNTRY.country(address)
+		except AddressNotFoundError:
+			pass
+		else:
+			iso_code = str(gcountry.country.iso_code)
+			country = str(gcountry.country.name)
 
-    if address.endswith(".onion"):
-        asn = "TOR"
-        org = "Tor network"
-    else:
-        try:
-            asn_record = GEOIP_ASN.asn(address)
-        except AddressNotFoundError:
-            pass
-        else:
-            asn = 'AS{}'.format(asn_record.autonomous_system_number)
-            org = str(asn_record.autonomous_system_organization).encode('utf-8')
+		try:
+			gcity = GEOIP_CITY.city(address)
+		except AddressNotFoundError:
+			pass
+		else:
+			city = str(gcity.city.name).encode('utf-8')
+			if gcity.location.latitude is not None and gcity.location.longitude is not None:
+				lat = float(Decimal(gcity.location.latitude).quantize(prec))
+				lng = float(Decimal(gcity.location.longitude).quantize(prec))
+			timezone = gcity.location.time_zone
 
-    return (iso_code, country, city, lat, lng, timezone, asn, org)
-
+	if address.endswith(".onion"):
+		asn = "TOR"
+		org = "Tor network"
+	else:
+		try:
+			asn_record = GEOIP_ASN.asn(address)
+		except AddressNotFoundError:
+			pass
+		else:
+			asn = 'AS{}'.format(asn_record.autonomous_system_number)
+			org = str(asn_record.autonomous_system_organization).encode('utf-8')
+	
+	return (iso_code, country, city, lat, lng, timezone, asn, org)
 
 def geolocateip_db(file_path):
-    addresses = []
-    geomap = {}
-    new_item = {}
-    initial_json_array = []
-    final_json_array = []
-    with open(file_path, 'r') as fp:
-        for line in fp.readlines():
-            address = line.split('\t')[0]
-            addresses.append(address)
-    fp.close()
-    print("Addresses found: "+ str(len(addresses)))
-
-    for address in addresses:
-        (iso_code, country, city, lat, lng, timezone, asn, org) = raw_geoip(address)
-        geomap['ip'] = address
-        geomap['iso'] = iso_code
-        geomap['country'] = country
-        geomap['lat'] = lat
-        geomap['lng'] = lng
-        s_json = json.dumps(geomap, indent=4, sort_keys=True)
-        ds_json = json.loads(s_json)
-        initial_json_array.append(ds_json)
-
-    with open('initialdata.json','w') as fp2:
-        json.dump(initial_json_array, fp2)
-
-    while(len(initial_json_array) >= 1):
-        item = initial_json_array.pop()
-        #if final_json_array doesn't have any element yet, put the popped item into it
-        if(len(final_json_array) == 0):
-            new_item = {}
-            new_item['id'] = item['iso']
-            new_item['name'] = item['country']
-            new_item['nodes'] = 1
-            new_item['percent'] = float("{0:.2f}".format(new_item['nodes'] * 100 / len(addresses)))
-            new_item['ips'] = list()
-            new_item['ips'].append(item['ip'])
-            final_json_array.append(new_item)
-        else: #that is, if there are already elements in the final_json_array
-            updated = False
-            # loop through existing elements in the final_json_array
-            for i in final_json_array:
-                # if there exists values for the country iso code, update the counts
-                if(bool(i.get('id') == item['iso'])):
-                    i['nodes'] = i['nodes'] + 1
-                    i['percent'] = float("{0:.2f}".format(i['nodes'] * 100 / len(addresses)))
-                    i['ips'].append(item['ip'])
-                    updated = True
-                    break
-            if not updated:
-                new_item = {}
-                new_item['id'] = item['iso']
-                new_item['name'] = item['country']
-                new_item['nodes'] = 1
-                new_item['percent'] = float("{0:.2f}".format(new_item['nodes'] * 100 / len(addresses)))
-                new_item['ips'] = list()
-                new_item['ips'].append(item['ip'])
-                final_json_array.append(new_item)
+	addresses = []
+	geomap = {}
+	new_item = {}
+	initial_json_array = []
+	final_json_array = []
+	with open(file_path, 'r') as fp:
+		for line in fp.readlines():
+			address = line.split('\t')[0]
+			addresses.append(address)
+	fp.close()
     
-    print("Number of countries: " + str(len(final_json_array)))
+	print("Addresses found: "+ str(len(addresses)))
 
-    with open('data.json','w') as fp3:
-        json.dump(final_json_array, fp3)
+	for address in addresses:
+		(iso_code, country, city, lat, lng, timezone, asn, org) = raw_geoip(address)
+		geomap['ip'] = address
+		geomap['iso'] = iso_code
+		geomap['country'] = country
+		geomap['lat'] = lat
+		geomap['lng'] = lng
+		s_json = json.dumps(geomap, indent=4, sort_keys=True)
+		ds_json = json.loads(s_json)
+		initial_json_array.append(ds_json)
 
+	with open('initialdata.json','w') as fp2:
+		json.dump(initial_json_array, fp2)
+	fp2.close()
+
+	while(len(initial_json_array) >= 1):
+		item = initial_json_array.pop()
+		#if final_json_array doesn't have any element yet, put the popped item into it
+		if(len(final_json_array) == 0):
+			new_item = {}
+			new_item['id'] = item['iso']
+			new_item['name'] = item['country']
+			new_item['z'] = 1
+			new_item['percent'] = float("{0:.2f}".format(new_item['z'] * 100 / len(addresses)))
+			new_item['ips'] = list()
+			new_item['ips'].append(item['ip'])
+			final_json_array.append(new_item)
+
+		else: #that is, if there are already elements in the final_json_array
+			updated = False
+			# loop through existing elements in the final_json_array
+			for i in final_json_array:
+				# if there exists values for the country iso code, update the counts
+				if(bool(i.get('id') == item['iso'])):
+					i['z'] = i['z'] + 1
+					i['percent'] = float("{0:.2f}".format(i['z'] * 100 / len(addresses)))
+					i['ips'].append(item['ip'])
+					updated = True
+					break
+			if not updated:
+				new_item = {}
+				new_item['id'] = item['iso']
+				new_item['name'] = item['country']
+				new_item['z'] = 1
+				new_item['percent'] = float("{0:.2f}".format(new_item['z'] * 100 / len(addresses)))
+				new_item['ips'] = list()
+				new_item['ips'].append(item['ip'])
+				final_json_array.append(new_item)
+    
+	print("Number of countries: " + str(len(final_json_array)))
+
+	with open('data.json','w') as fp3:
+		json.dump(final_json_array, fp3)
+	fp3.close()
 
 #main boilerplate syntax
 if __name__ == '__main__':
@@ -294,9 +330,13 @@ if __name__ == '__main__':
 	global GEOIP_CITY
 	global GEOIP_ASN
 
+	#offline geoip databases provided by MaxMind
 	GEOIP_COUNTRY = geoip2.database.Reader("GeoLite2-Country.mmdb")
 	GEOIP_CITY = geoip2.database.Reader("GeoLite2-City.mmdb")
 	GEOIP_ASN = geoip2.database.Reader("GeoLite2-ASN.mmdb")
+
+	#maximum number of nodes to collect
+	MAX_NODELIST_LENGTH = 9600
 
 	#set seed.bitcoin.sipa.be as the seed node
 	seed_nodelist = {'193.111.156.2':8333,'199.16.8.253':8333, '79.77.33.128':8333, '79.235.174.12':8333, '84.217.160.164':8333, '195.154.187.6':8333}
@@ -304,11 +344,16 @@ if __name__ == '__main__':
 	global nodelistread
 	nodelistread = []
 
+	global CURRENT_TIME
+	CURRENT_TIME = time.time()
+	print("------------------------------------------------------------------------------------")
+	print("Starting phase one: IP Collection")
+
 	#check if there is already a file containing IP addresses
-	file_path = Path('output.txt')
+	file_path = Path('nodelist.txt')
 	if(not file_path.exists()):
 		print("Node list doesn't exist. Creating one")
-		with open('output.txt','w') as fp:
+		with open('nodelist.txt','w') as fp:
 			for k,v in seed_nodelist.items():
 				fp.write(k + "\t" + str(v) + "\n")
 				nodelist[k] = v
@@ -316,7 +361,7 @@ if __name__ == '__main__':
 		fp.close()
 	else:
 		print("Output file exists already. Reading peer nodes list")
-		with open('output.txt','r') as fp2:
+		with open('nodelist.txt','r') as fp2:
 			for line in fp2.readlines():
 				ip = line.split('\t')[0] #strip the ip from each line
 				port = int(line.split('\t')[-1]) #strip the port from each line
@@ -327,12 +372,25 @@ if __name__ == '__main__':
 	while(True):
 		for k,v in nodelist.copy().items():
 			if k not in nodelistread:
-				childThread = threading.Thread(target=check_host_family, args=(k,v,))
-				childThread.daemon = True
-				childThread.start()
-				childThread.join()
+				check_host_family(k,v)
 			else:
 				continue
 
+			#explicitly break the loop when the list of nodes found active in the last 8 hours is greater than 9500
+			if(len(nodelist) >= MAX_NODELIST_LENGTH): #break the inner for loop once nodelist exceeds MAX_NODELIST_LENGTH i.e. 9600
+				break 
+		
+		if(len(nodelist) >= MAX_NODELIST_LENGTH): #break the outer while loop once nodelist exceeds MAX_NODELIST_LENGTH i.e. 9600
+			break 
+
 		if(len(nodelist) == len(nodelistread)):
 			break
+
+	print("Collected sufficient nodes!!!")
+	print("------------------------------------------------------------------------------------")
+	print("Starting phase two: GeoMapping")
+	geolocateip_db('nodelist.txt')
+
+
+		
+		

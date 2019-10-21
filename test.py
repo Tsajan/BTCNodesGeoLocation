@@ -5,6 +5,7 @@ import json
 import requests
 from geoip2.errors import AddressNotFoundError
 from decimal import Decimal
+import time
 
 IPSTACK_API_KEY = '4afa84dfb47b7fbbce59b1fd3d2096a2'
 GEOIP_USER_ID = 143765
@@ -19,6 +20,7 @@ def raw_geoip(address):
     Resolves GeoIP data for the specified address using MaxMind databases.
     """
     country = None
+    iso_code = None
     city = None
     lat = 0.0
     lng = 0.0
@@ -34,8 +36,8 @@ def raw_geoip(address):
         except AddressNotFoundError:
             pass
         else:
-            iso_code = str(gcountry.country.iso_code).encode('utf-8')
-            country = str(gcountry.country.name).encode('utf-8')
+            iso_code = str(gcountry.country.iso_code)
+            country = str(gcountry.country.name)
 
         try:
             gcity = GEOIP_CITY.city(address)
@@ -58,45 +60,76 @@ def raw_geoip(address):
         except AddressNotFoundError:
             pass
         else:
-            asn = 'AS{}'.format(asn_record.autonomous_system_number).encode('utf-8')
+            asn = 'AS{}'.format(asn_record.autonomous_system_number)
             org = str(asn_record.autonomous_system_organization).encode('utf-8')
 
-    return (city, country, lat, lng, timezone, asn, org)
+    return (iso_code, country, city, lat, lng, timezone, asn, org)
 
 def geolocateip_db(file_path):
     addresses = []
     geomap = {}
+    new_item = {}
+    initial_json_array = []
+    final_json_array = []
     with open(file_path, 'r') as fp:
         for line in fp.readlines():
             address = line.split('\t')[0]
             addresses.append(address)
     fp.close()
     print("Addresses found: "+ str(len(addresses)))
-    with open('details.txt','w') as fp:
-        for address in addresses:
-            # try:
-            #     gcountry = GEOIP_COUNTRY.country(address)
-            # except AddressNotFoundError:
-            #     pass
-            # else:
-            #     country = gcountry.country.name
 
-            # try:
-            #     gcity = GEOIP_CITY.city(address)
-            # except AddressNotFoundError:
-            #     pass
-            # else:
-            #     city = gcity.city.name
-            #     latitude = gcity.location.latitude
-            #     longitude = gcity.location.longitude
-            #     zip_code = gcity.location.postal_code
+    for address in addresses:
+        (iso_code, country, city, lat, lng, timezone, asn, org) = raw_geoip(address)
+        geomap['ip'] = address
+        geomap['iso'] = iso_code
+        geomap['country'] = country
+        geomap['lat'] = lat
+        geomap['lng'] = lng
+        s_json = json.dumps(geomap, indent=4, sort_keys=True)
+        ds_json = json.loads(s_json)
+        initial_json_array.append(ds_json)
 
-            # try:
-            #     asn_record = ASN.
+    with open('initialdata.json','w') as fp2:
+        json.dump(initial_json_array, fp2)
 
-            geomap[address] = raw_geoip(address)
-            print(address + "\t" + str(geomap[address]) + "\n")
-            fp.write(address + "\t" + str(geomap[address]) + "\n")
+    while(len(initial_json_array) >= 1):
+        item = initial_json_array.pop()
+        #if final_json_array doesn't have any element yet, put the popped item into it
+        if(len(final_json_array) == 0):
+            new_item = {}
+            new_item['id'] = item['iso']
+            new_item['name'] = item['country']
+            new_item['nodes'] = 1
+            new_item['percent'] = float("{0:.2f}".format(new_item['nodes'] * 100 / len(addresses)))
+            new_item['ips'] = list()
+            new_item['ips'].append(item['ip'])
+            final_json_array.append(new_item)
+        else: #that is, if there are already elements in the final_json_array
+            updated = False
+            # loop through existing elements in the final_json_array
+            for i in final_json_array:
+                # if there exists values for the country iso code, update the counts
+                if(bool(i.get('id') == item['iso'])):
+                    i['nodes'] = i['nodes'] + 1
+                    i['percent'] = float("{0:.2f}".format(i['nodes'] * 100 / len(addresses)))
+                    i['ips'].append(item['ip'])
+                    updated = True
+                    break
+            if not updated:
+                new_item = {}
+                new_item['id'] = item['iso']
+                new_item['name'] = item['country']
+                new_item['nodes'] = 1
+                new_item['percent'] = float("{0:.2f}".format(new_item['nodes'] * 100 / len(addresses)))
+                new_item['ips'] = list()
+                new_item['ips'].append(item['ip'])
+                final_json_array.append(new_item)
+    
+    print("Number of countries: " + str(len(final_json_array)))
+
+    with open('data.json','w') as fp3:
+        json.dump(final_json_array, fp3)
+
 
 def geolocateip_using_geoip2(file_path):
     iplist = []
@@ -144,5 +177,5 @@ if __name__ == '__main__':
     # for k,v in geomap.item():
     #     print("IP: " + k + "\tGeoinformation: " + v)
     # geolocateip_using_ipstack('output.txt')
-    geolocateip_db('output.txt')
+    geolocateip_db('archive.txt')
 
