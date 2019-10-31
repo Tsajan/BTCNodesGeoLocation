@@ -145,7 +145,7 @@ def sniff_addr_packets(host, port):
 		print("Waiting for packets!")
 		capture.sniff(timeout=30)
 		pkts = [pkt for pkt in capture._packets]
-		print("No. of packets captured: " + str(len(pkts)))
+		# print("No. of packets captured: " + str(len(pkts)))
 		
 		print("Closing Capture")
 		capture.close()
@@ -183,10 +183,9 @@ def sniff_addr_packets(host, port):
 						if (formattedIP not in nodelist) and (age <= 86400):
 							nodelist[formattedIP] = int(formattedPort)
 							f.write(formattedIP + "\t" + formattedPort + "\n")
-						print(f"IP: {formattedIP} \t\t Port: {formattedPort} \t\t Timestamp: {formattedTSString}\n")
+						# print(f"IP: {formattedIP} \t\t Port: {formattedPort} \t\t Timestamp: {formattedTSString}\n")
 
 		print("Either packet count has reached its limit or has reached timeout")
-		print("End Time: " + str(time.time()))
 	
 		#close the socket connection
 		sock.shutdown(socket.SHUT_RDWR)
@@ -313,6 +312,10 @@ def geolocateip_db(file_path):
 				new_item['ips'] = list()
 				new_item['ips'].append(item['ip'])
 				final_json_array.append(new_item)
+
+	# remove null or None keys from the array of JSON
+	final_json_array = [item for item in final_json_array if item['id'] != "None"]
+	final_json_array = [item for item in final_json_array if item['id'] != "null"]
     
 	print("Number of countries: " + str(len(final_json_array)))
 
@@ -346,7 +349,7 @@ if __name__ == '__main__':
 
 	global CURRENT_TIME
 	CURRENT_TIME = time.time()
-	print("------------------------------------------------------------------------------------")
+	print("------------------------------------------------------------------------------")
 	print("Starting phase one: IP Collection")
 
 	#check if there is already a file containing IP addresses
@@ -387,10 +390,13 @@ if __name__ == '__main__':
 			break
 
 	print("Collected sufficient nodes!!!")
-	print("------------------------------------------------------------------------------------")
+	print("------------------------------------------------------------------------------")
 	print("Starting phase two: GeoMapping")
 	geolocateip_db('nodelist.txt')
 
+	END_TIME = time.time()
+	DIFF_TIME = END_TIME - CURRENT_TIME
+	print("Time taken: " + str(float(DIFF_TIME/60)) + "mins.")
 
 		
 		
