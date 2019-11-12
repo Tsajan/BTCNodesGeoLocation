@@ -353,7 +353,9 @@ if __name__ == '__main__':
 
 	threadList=[]
 	pool = Pool(processes=multiprocessing.cpu_count())
+	pool2 = Pool(processes=100)
 	maxPool=4;
+	maxPool2=100;
 	manager =  Manager()
 	nodelist = manager.dict()
 	nodelistread = manager.list()
@@ -368,16 +370,31 @@ if __name__ == '__main__':
 		for k,v in nodelist.copy().items():
 			if k not in nodelistread:
 				nodelistread.append(k)
-				if len(threadList) >= maxPool:
-					print("********************************************************")
-					print("************THREAD LIST CLEARED*************************")
-					print("*               "+str(len(threadList))+"               *")
-					print("********************************************************")
-					for x in threadList:
-						x.get()
-					threadList=[]
+				
+				#the case when there are less than 100 node addresses in our list, we decide to do multiprocessing with only 4 processes
+				if(len(nodelist) < 100):
+					if len(threadList) >= maxPool:
+						print("********************************************************")
+						print("************THREAD LIST CLEARED*************************")
+						print("*               "+str(len(threadList))+"               *")
+						print("********************************************************")
+						for x in threadList:
+							x.get()
+						threadList=[]
+					else:
+						threadList.append(pool.apply_async(check_host_family, (k, v, nodelist, nodelistread)))
+				# else when there are more than 100 nodes addresses, we do multiprocessing with 100 processes
 				else:
-					threadList.append(pool.apply_async(check_host_family, (k, v, nodelist, nodelistread)))
+					if len(threadList) >= maxPool2:
+						print("********************************************************")
+						print("************THREAD LIST CLEARED*************************")
+						print("*               "+str(len(threadList))+"               *")
+						print("********************************************************")
+						for x in threadList:
+							x.get()
+						threadList=[]
+					else:
+						threadList.append(pool2.apply_async(check_host_family, (k, v, nodelist, nodelistread)))
 
 			else:
 				continue
