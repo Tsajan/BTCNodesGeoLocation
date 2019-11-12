@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+	<head>
+    	<!-- Required meta tags -->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+		<!-- Bootstrap CSS -->
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+		<title>Active Bitcoin Full Nodes</title>
+		<script src="https://code.highcharts.com/maps/highmaps.js"></script>
+		<script src="https://code.highcharts.com/maps/modules/data.js"></script>
+		<script src="https://code.highcharts.com/maps/modules/data.js"></script>
+		<script src="https://code.highcharts.com/maps/modules/exporting.js"></script>
+		<script src="https://code.highcharts.com/maps/modules/offline-exporting.js"></script>
+		<script src="https://code.highcharts.com/mapdata/custom/world.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	</head>
+	<body>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-10" id="mapcontainer" style="height: 800px"></div>
+				<div class="col-2" id="listings" style="height: 800px">
+					<table class="table table-striped">
+						<thead id="headings">
+						    <tr>
+						        <th scope="col" data-attr="name">Country</th>
+						        <th scope="col" id="node_headings" data-attr="z">Nodes</th>
+						    </tr>
+						</thead>
+						<tbody id="results">
+						    <!-- auto-populated -->
+						</tbody>
+					</table>
+
+					<!-- Button trigger modal -->
+					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">View More</button>
+				</div>
+			</div>
+		</div>
+		<!-- Modal -->
+		<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		  	<div class="modal-dialog modal-dialog-scrollable modal-xl" role="document">
+		    	<div class="modal-content">
+		      		<div class="modal-header">
+		        		<h5 class="modal-title" id="exampleModalLabel">Distribution of Active Bitcoin Nodes</h5>
+		        		<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		          			<span aria-hidden="true">&times;</span>
+		        		</button>
+		      		</div>
+		      		<div class="modal-body">
+		        		<table class="table table-striped">
+		        			<tbody id="nodedetails">
+		        				<!-- autopopulated portion -->
+		        			</tbody>
+		        		</table>
+		      		</div>
+		      		<div class="modal-footer">
+		        		<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+		        		<button type="button" class="btn btn-primary">Save changes</button>
+		      		</div>
+		    	</div>
+		  	</div>
+		</div>
+		
+		<script>
+			var data;
+			$.getJSON( "data1029.json", function( json ) {
+	    		data = json
+			});
+			console.log(data)
+			setTimeout(function() {
+				Highcharts.mapChart('mapcontainer', {
+				chart: {
+				  borderWidth: 1,
+				  map: 'custom/world'
+				},
+
+				title: {
+				  text: 'Geographical Distribution of Bitcoin Nodes'
+				},
+
+				subtitle: {
+				  text: 'Nodes Active in the last 24 hours'
+				},
+
+				credits: {
+					enabled: false
+				},
+
+				legend: {
+				  enabled: false
+				},
+
+				mapNavigation: {
+				  enabled: true,
+				  buttonOptions: {
+				    verticalAlign: 'bottom'
+				  }
+				},
+
+				series: [{
+				  name: 'Countries',
+				  color: '#E0E0E0',
+				  enableMouseTracking: false
+				}, {
+				  type: 'mapbubble',
+				  name: 'Active Bitcoin Nodes',
+				  joinBy: ['iso-a2', 'id'],
+				  data: data,
+				  minSize: 4,
+				  maxSize: '12%',
+				  tooltip: {
+				    pointFormat: '{point.properties.name}: {point.z} nodes i.e. {point.percent} %'
+				  }
+				}]
+				})
+			}, 3000);
+
+			$(function() {
+			    $('#node_headings').on('mouseenter', function() {
+			        var attr = $(this).attr('data-attr');
+			        var asc = (!$(this).attr('data-asc')); // switch the order, true if not set
+			        
+			        // clear any previous sort order indicators
+			        $('#node_headings').each(function() {
+			            $(this).removeAttr('data-asc');
+			        });
+			        // set sort order indicator
+			        if (asc) {
+			            $(this).attr('data-asc', 'asc');
+			        }
+
+			        sortResults(attr, asc);
+			    });
+			    renderResults();
+			    renderModalBody();
+			    
+			});
+
+			function sortResults(prop, asc) {
+			    data.sort(function(a, b) {
+			    	return (b[prop] > a[prop]) ? 1 : ((b[prop] < a[prop]) ? -1 : 0);
+			    });
+			    renderResults();
+			    renderModalBody();
+			}
+
+			function renderModalBody() {
+				var modalentries = '';
+				var i;
+				var j;
+				var rank;
+				for (i=0; i<data.length; i=i+3) {
+					modalentries += '<tr>';
+					for(j=i; j<=i+2; j++) {
+						rank = j+1
+						modalentries += '<td>' + rank + '. ' + data[j].name + ' (' + data[j].z + ') </td>'
+					}
+					modalentries += '</tr>' 
+				}
+				$('#nodedetails').html(modalentries)
+			}
+
+			function renderResults () {
+			    var html = '';
+			    var i;
+			    for (i = 0; i < 15; i++) {
+			        html += '<tr>'
+			            +'<td>'+data[i].name+'</td>'
+			            +'<td>'+data[i].z+'</td>'
+			        +'</tr>';
+			    }
+			    $('#results').html(html);
+			}
+
+		</script>
+	</body>
+</html>
