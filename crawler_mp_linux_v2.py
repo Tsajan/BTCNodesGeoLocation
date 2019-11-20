@@ -190,6 +190,8 @@ def sniff_addr_packets(host, port, nodelist, nodelistread):
 						nodelist[formattedIP] = int(formattedPort)
 						# f.write(formattedIP + "\t" + formattedPort + "\n")
 					# print(f"IP: {formattedIP} \t\t Port: {formattedPort} \t\t Timestamp: {formattedTSString}\n")
+			else:
+				continue
 
 		print("Packet Count Limit or Timeout Reached")
 	
