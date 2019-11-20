@@ -144,7 +144,7 @@ def sniff_addr_packets(host, port, nodelist, nodelistread):
 			print("Caught exception: %s" % err)
 			pass
 		print("Waiting for packets!")
-		capture.sniff(timeout=30)
+		capture.sniff(timeout=25)
 		pkts = [pkt for pkt in capture._packets]
 		# print("No. of packets captured: " + str(len(pkts)))
 		
@@ -152,43 +152,47 @@ def sniff_addr_packets(host, port, nodelist, nodelistread):
 		capture.close()
 		
 		for pkt in pkts:
-			if(pkt.bitcoin.command == 'addr'):
-				#increment the packet_count
-				pkt_cnt += int(pkt.bitcoin.addr_count)
-				addresses = list(pkt.bitcoin.address_address.all_fields)
-				ports = list(pkt.bitcoin.address_port.all_fields)
-				services = list(pkt.bitcoin.address_services.all_fields)
-				ts = list(pkt.bitcoin.addr_timestamp.all_fields)
-				
-				
-				for i,j,x,y in zip(addresses, ports, services, ts):
-					unformattedIP = str(i)
-					#remove unnecessary information provided by the 
-					formattedIP = unformattedIP.strip('<').strip('>').split(' ')[-1]
-					#if the IP address is IPv4 address strip the ipv6 padding at the front
-					if(formattedIP.startswith('::ffff:')):
-						formattedIP = formattedIP.strip('::ffff:')
+			try:
+				if(pkt.bitcoin.command == 'addr'):
+					#increment the packet_count
+					pkt_cnt += int(pkt.bitcoin.addr_count)
+					addresses = list(pkt.bitcoin.address_address.all_fields)
+					ports = list(pkt.bitcoin.address_port.all_fields)
+					services = list(pkt.bitcoin.address_services.all_fields)
+					ts = list(pkt.bitcoin.addr_timestamp.all_fields)
 					
-					unformattedPort = str(j)
-					formattedPort = unformattedPort.strip('<').strip('>').split(' ')[-1]
 					
-					#formatting the service field
-					unformattedService = str(x)
-					formattedService = unformattedService.strip('<').strip('>').split(' ')[-1]
-					serv = formattedService.strip('0x')
+					for i,j,x,y in zip(addresses, ports, services, ts):
+						unformattedIP = str(i)
+						#remove unnecessary information provided by the 
+						formattedIP = unformattedIP.strip('<').strip('>').split(' ')[-1]
+						#if the IP address is IPv4 address strip the ipv6 padding at the front
+						if(formattedIP.startswith('::ffff:')):
+							formattedIP = formattedIP.strip('::ffff:')
+						
+						unformattedPort = str(j)
+						formattedPort = unformattedPort.strip('<').strip('>').split(' ')[-1]
+						
+						#formatting the service field
+						unformattedService = str(x)
+						formattedService = unformattedService.strip('<').strip('>').split(' ')[-1]
+						serv = formattedService.strip('0x')
 
-					#formatting the address timestamp of each peer
-					unformattedTS = str(y)
-					formattedTSString = unformattedTS.split('p:')[-1].split('.0')[0].strip(' ')
-					
-					#we define a variable age to look for only recent peers
-					uts = time.mktime(datetime.datetime.strptime(formattedTSString, "%b %d, %Y %H:%M:%S").timetuple())
-					age = int(time.time() - uts)
-					
-					#add the IP address to the nodelist dictionary if it has not been added yet and if it's age in less than 8 hours
-					if (formattedIP not in nodelist) and (age <= 28800) and (serv == '40d'):
-						nodelist[formattedIP] = int(formattedPort)
-						# f.write(formattedIP + "\t" + formattedPort + "\n")
+						#formatting the address timestamp of each peer
+						unformattedTS = str(y)
+						formattedTSString = unformattedTS.split('p:')[-1].split('.0')[0].strip(' ')
+						
+						#we define a variable age to look for only recent peers
+						uts = time.mktime(datetime.datetime.strptime(formattedTSString, "%b %d, %Y %H:%M:%S").timetuple())
+						age = int(time.time() - uts)
+						
+						#add the IP address to the nodelist dictionary if it has not been added yet and if it's age in less than 8 hours
+						if (formattedIP not in nodelist) and (age <= 28800) and (serv == '40d'):
+							nodelist[formattedIP] = int(formattedPort)
+							# f.write(formattedIP + "\t" + formattedPort + "\n")
+			except AttributeError as err:
+				print("Caught exception: %s" % err)
+				continue
 
 		print("Packet Count Limit or Timeout Reached")
 	
@@ -358,8 +362,10 @@ if __name__ == '__main__':
 	threadList=[]
 	pool = Pool(processes=multiprocessing.cpu_count())
 	pool2 = Pool(processes=100)
+	pool3 = Pool(processes=200)
 	maxPool=4;
 	maxPool2=100;
+	maxPool3=200;
 	manager =  Manager()
 	nodelist = manager.dict()
 	nodelistread = manager.list()
@@ -375,7 +381,6 @@ if __name__ == '__main__':
 			if k not in nodelistread:
 				nodelistread.append(k)
 				
-				#the case when there are less than 100 node addresses in our list, we decide to do multiprocessing with only 4 processes
 				if(len(nodelist) < 100):
 					if len(threadList) >= maxPool:
 						print("********************************************************")
@@ -388,7 +393,7 @@ if __name__ == '__main__':
 					else:
 						threadList.append(pool.apply_async(check_host_family, (k, v, nodelist, nodelistread)))
 				# else when there are more than 100 nodes addresses, we do multiprocessing with 100 processes
-				else:
+				elif((len(nodelist) - len(nodelistread)) >= 100 and (len(nodelist) - len(nodelistread)) <= 200):
 					if len(threadList) >= maxPool2:
 						print("********************************************************")
 						print("************THREAD LIST CLEARED*************************")
@@ -399,6 +404,17 @@ if __name__ == '__main__':
 						threadList=[]
 					else:
 						threadList.append(pool2.apply_async(check_host_family, (k, v, nodelist, nodelistread)))
+				else:
+					if len(threadList) >= maxPool3:
+						print("********************************************************")
+						print("************THREAD LIST CLEARED*************************")
+						print("*               "+str(len(threadList))+"               *")
+						print("********************************************************")
+						for x in threadList:
+							x.get()
+						threadList=[]
+					else:
+						threadList.append(pool3.apply_async(check_host_family, (k, v, nodelist, nodelistread)))
 
 			else:
 				continue
