@@ -152,45 +152,47 @@ def sniff_addr_packets(host, port, nodelist, nodelistread):
 		capture.close()
 		
 		for pkt in pkts:
-			if(pkt.bitcoin.command == 'addr'):
-				#increment the packet_count
-				pkt_cnt += int(pkt.bitcoin.addr_count)
-				addresses = list(pkt.bitcoin.address_address.all_fields)
-				ports = list(pkt.bitcoin.address_port.all_fields)
-				services = list(pkt.bitcoin.address_services.all_fields)
-				ts = list(pkt.bitcoin.addr_timestamp.all_fields)
-				
-				
-				for i,j,x,y in zip(addresses, ports, services, ts):
-					unformattedIP = str(i)
-					#remove unnecessary information provided by the 
-					formattedIP = unformattedIP.strip('<').strip('>').split(' ')[-1]
-					#if the IP address is IPv4 address strip the ipv6 padding at the front
-					if(formattedIP.startswith('::ffff:')):
-						formattedIP = formattedIP.strip('::ffff:')
+			try:
+				if(pkt.bitcoin.command == 'addr'):
+					#increment the packet_count
+					pkt_cnt += int(pkt.bitcoin.addr_count)
+					addresses = list(pkt.bitcoin.address_address.all_fields)
+					ports = list(pkt.bitcoin.address_port.all_fields)
+					services = list(pkt.bitcoin.address_services.all_fields)
+					ts = list(pkt.bitcoin.addr_timestamp.all_fields)
 					
-					unformattedPort = str(j)
-					formattedPort = unformattedPort.strip('<').strip('>').split(' ')[-1]
+					
+					for i,j,x,y in zip(addresses, ports, services, ts):
+						unformattedIP = str(i)
+						#remove unnecessary information provided by the 
+						formattedIP = unformattedIP.strip('<').strip('>').split(' ')[-1]
+						#if the IP address is IPv4 address strip the ipv6 padding at the front
+						if(formattedIP.startswith('::ffff:')):
+							formattedIP = formattedIP.strip('::ffff:')
+						
+						unformattedPort = str(j)
+						formattedPort = unformattedPort.strip('<').strip('>').split(' ')[-1]
 
-					#formatting the service field
-					unformattedService = str(x)
-					formattedService = unformattedService.strip('<').strip('>').split(' ')[-1]
-					serv = formattedService.strip('0x')
-					
-					#formatting the address timestamp of each peer
-					unformattedTS = str(y)
-					formattedTSString = unformattedTS.split('p:')[-1].split('.0')[0].strip(' ')
-					
-					#we define a variable age to look for only recent peers
-					uts = time.mktime(datetime.datetime.strptime(formattedTSString, "%b %d, %Y %H:%M:%S").timetuple())
-					age = int(time.time() - uts)
-					
-					#add the IP address to the nodelist dictionary if it has not been added yet and if it's age in less than 8 hours
-					if (formattedIP not in nodelist) and (age <= 28800) and (serv == '40d'):
-						nodelist[formattedIP] = int(formattedPort)
-						# f.write(formattedIP + "\t" + formattedPort + "\n")
-					# print(f"IP: {formattedIP} \t\t Port: {formattedPort} \t\t Timestamp: {formattedTSString}\n")
-			else:
+						#formatting the service field
+						unformattedService = str(x)
+						formattedService = unformattedService.strip('<').strip('>').split(' ')[-1]
+						serv = formattedService.strip('0x')
+						
+						#formatting the address timestamp of each peer
+						unformattedTS = str(y)
+						formattedTSString = unformattedTS.split('p:')[-1].split('.0')[0].strip(' ')
+						
+						#we define a variable age to look for only recent peers
+						uts = time.mktime(datetime.datetime.strptime(formattedTSString, "%b %d, %Y %H:%M:%S").timetuple())
+						age = int(time.time() - uts)
+						
+						#add the IP address to the nodelist dictionary if it has not been added yet and if it's age in less than 8 hours
+						if (formattedIP not in nodelist) and (age <= 28800) and (serv == '40d'):
+							nodelist[formattedIP] = int(formattedPort)
+							# f.write(formattedIP + "\t" + formattedPort + "\n")
+						# print(f"IP: {formattedIP} \t\t Port: {formattedPort} \t\t Timestamp: {formattedTSString}\n")
+			except AttributeError as err:
+				print("Caught exception: %s" % err)
 				continue
 
 		print("Packet Count Limit or Timeout Reached")
