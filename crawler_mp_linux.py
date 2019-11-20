@@ -171,6 +171,11 @@ def sniff_addr_packets(host, port, nodelist, nodelistread):
 					
 					unformattedPort = str(j)
 					formattedPort = unformattedPort.strip('<').strip('>').split(' ')[-1]
+
+					#formatting the service field
+					unformattedService = str(x)
+					formattedService = unformattedService.strip('<').strip('>').split(' ')[-1]
+					serv = formattedService.strip('0x')
 					
 					#formatting the address timestamp of each peer
 					unformattedTS = str(y)
@@ -180,8 +185,8 @@ def sniff_addr_packets(host, port, nodelist, nodelistread):
 					uts = time.mktime(datetime.datetime.strptime(formattedTSString, "%b %d, %Y %H:%M:%S").timetuple())
 					age = int(time.time() - uts)
 					
-					#add the IP address to the nodelist dictionary if it has not been added yet and if it's age in less than 24 hours
-					if (formattedIP not in nodelist) and (age <= 86400):
+					#add the IP address to the nodelist dictionary if it has not been added yet and if it's age in less than 8 hours
+					if (formattedIP not in nodelist) and (age <= 28800) and (serv == '40d'):
 						nodelist[formattedIP] = int(formattedPort)
 						# f.write(formattedIP + "\t" + formattedPort + "\n")
 					# print(f"IP: {formattedIP} \t\t Port: {formattedPort} \t\t Timestamp: {formattedTSString}\n")
@@ -336,10 +341,6 @@ if __name__ == '__main__':
 	GEOIP_CITY = geoip2.database.Reader("GeoLite2-City.mmdb")
 	GEOIP_ASN = geoip2.database.Reader("GeoLite2-ASN.mmdb")
 
-	#maximum number of nodes to collect
-	MAX_NODELIST_LENGTH = 9600
-
-	
 
 	# global nodelistread
 	# nodelistread = []
@@ -398,11 +399,11 @@ if __name__ == '__main__':
 				continue
 
 			#explicitly break the loop when the list of nodes found active in the last 8 hours is greater than 9500
-			if(len(nodelist) >= MAX_NODELIST_LENGTH): #break the inner for loop once nodelist exceeds MAX_NODELIST_LENGTH i.e. 9600
-				break 
+		# 	if(len(nodelist) >= MAX_NODELIST_LENGTH): #break the inner for loop once nodelist exceeds MAX_NODELIST_LENGTH i.e. 9600
+		# 		break 
 		
-		if(len(nodelist) >= MAX_NODELIST_LENGTH): #break the outer while loop once nodelist exceeds MAX_NODELIST_LENGTH i.e. 9600
-			break 
+		# if(len(nodelist) >= MAX_NODELIST_LENGTH): #break the outer while loop once nodelist exceeds MAX_NODELIST_LENGTH i.e. 9600
+		# 	break 
 
 		if(len(nodelist) == len(nodelistread)):
 			break
@@ -417,6 +418,3 @@ if __name__ == '__main__':
 	END_TIME = time.time()
 	DIFF_TIME = END_TIME - CURRENT_TIME
 	print("Time taken: " + str(float(DIFF_TIME/60)) + "mins.")
-
-		
-		
