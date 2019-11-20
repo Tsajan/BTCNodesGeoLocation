@@ -728,3 +728,189 @@ Traceback (most recent call last):
   File "C:\Users\sajan\Anaconda3\lib\subprocess.py", line 1193, in _internal_poll
     if _WaitForSingleObject(self._handle, 0) == _WAIT_OBJECT_0:
 OSError: [WinError 6] The handle is invalid
+2019-11-20 11:02:19 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32955e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:02:19 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32955e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:02:19 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32955e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:02:19 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32955e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:02:19 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32955e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:02:19 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32955e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:02:20 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32955e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:02:20 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32955e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:02:20 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x36c4310> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:02:20 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32965e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:02:20 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32955e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:02:20 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32955e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:02:20 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32955e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:17:09 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32955e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:17:09 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32965e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:17:09 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32955e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:17:09 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32965e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:17:09 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32955e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:17:09 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32955e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:17:09 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32955e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:17:09 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32955e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:17:09 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x36c4310> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:17:09 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32955e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:17:10 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32955e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:17:10 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32955e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:17:10 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32955e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:17:10 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32955e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:17:10 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32955e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:17:10 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32955e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:17:10 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x36c6310> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid
+2019-11-20 11:17:11 ERROR    Cancelling an overlapped future failed
+future: <_OverlappedFuture pending overlapped=<pending, 0x32955e0> cb=[BaseProactorEventLoop._loop_self_reading()]>
+Traceback (most recent call last):
+  File "C:\Users\sajan\Anaconda3\lib\asyncio\windows_events.py", line 64, in _cancel_overlapped
+    self._ov.cancel()
+OSError: [WinError 6] The handle is invalid

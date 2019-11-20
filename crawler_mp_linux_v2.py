@@ -171,6 +171,11 @@ def sniff_addr_packets(host, port, nodelist, nodelistread):
 					
 					unformattedPort = str(j)
 					formattedPort = unformattedPort.strip('<').strip('>').split(' ')[-1]
+
+					#formatting the service field
+					unformattedService = str(x)
+					formattedService = unformattedService.strip('<').strip('>').split(' ')[-1]
+					serv = formattedService.strip('0x')
 					
 					#formatting the address timestamp of each peer
 					unformattedTS = str(y)
@@ -180,8 +185,8 @@ def sniff_addr_packets(host, port, nodelist, nodelistread):
 					uts = time.mktime(datetime.datetime.strptime(formattedTSString, "%b %d, %Y %H:%M:%S").timetuple())
 					age = int(time.time() - uts)
 					
-					#add the IP address to the nodelist dictionary if it has not been added yet and if it's age in less than 24 hours
-					if (formattedIP not in nodelist) and (age <= 86400):
+					#add the IP address to the nodelist dictionary if it has not been added yet and if it's age in less than 8 hours
+					if (formattedIP not in nodelist) and (age <= 28800) and (serv == '40d'):
 						nodelist[formattedIP] = int(formattedPort)
 						# f.write(formattedIP + "\t" + formattedPort + "\n")
 					# print(f"IP: {formattedIP} \t\t Port: {formattedPort} \t\t Timestamp: {formattedTSString}\n")
@@ -336,10 +341,6 @@ if __name__ == '__main__':
 	GEOIP_CITY = geoip2.database.Reader("GeoLite2-City.mmdb")
 	GEOIP_ASN = geoip2.database.Reader("GeoLite2-ASN.mmdb")
 
-	#maximum number of nodes to collect
-	MAX_NODELIST_LENGTH = 9600
-
-	
 
 	# global nodelistread
 	# nodelistread = []
@@ -354,10 +355,10 @@ if __name__ == '__main__':
 	threadList=[]
 	pool = Pool(processes=multiprocessing.cpu_count())
 	pool2 = Pool(processes=100)
-	pool3 = Pool(processes=700)
+	pool3 = Pool(processes=200)
 	maxPool=10;
 	maxPool2=100;
-	maxPool3=700;
+	maxPool3=200;
 	manager =  Manager()
 	nodelist = manager.dict()
 	nodelistread = manager.list()
@@ -385,7 +386,7 @@ if __name__ == '__main__':
 					else:
 						threadList.append(pool.apply_async(check_host_family, (k, v, nodelist, nodelistread)))
 				# else when there are more than 100 nodes addresses, we do multiprocessing with 100 processes
-				elif((len(nodelist) - len(nodelistread)) > 100 and (len(nodelist) - len(nodelistread)) <=700):
+				elif((len(nodelist) - len(nodelistread)) >= 100 and (len(nodelist) - len(nodelistread)) <= 200):
 					if len(threadList) >= maxPool2:
 						print("********************************************************")
 						print("************THREAD LIST CLEARED*************************")

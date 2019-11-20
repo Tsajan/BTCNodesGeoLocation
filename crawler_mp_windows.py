@@ -189,8 +189,6 @@ def sniff_addr_packets(host, port, nodelist, nodelistread):
 					if (formattedIP not in nodelist) and (age <= 28800) and (serv == '40d'):
 						nodelist[formattedIP] = int(formattedPort)
 						# f.write(formattedIP + "\t" + formattedPort + "\n")
-					print(f"Services: {formattedService}\n")
-					print(type(formattedService))
 
 		print("Packet Count Limit or Timeout Reached")
 	
