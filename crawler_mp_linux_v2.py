@@ -349,12 +349,9 @@ if __name__ == '__main__':
 	# global nodelistread
 	# nodelistread = []
 	CURRENT_TIME = time.time()
+	
 	print("------------------------------------------------------------------------------")
 	print("Starting phase one: IP Collection")
-
-	#read data from seed node list
-	# for k,v in seed_nodelist.items():
-	# 	nodelist[k] = v
 
 	threadList=[]
 	pool = Pool(processes=multiprocessing.cpu_count())
@@ -373,7 +370,8 @@ if __name__ == '__main__':
 	for k,v in seed_nodelist.items():
 		nodelist[k] = v
 
-	while(True):
+	END_TIME = time.time() + 720 #run the loop for 12 minutes
+	while(time.time() <= END_TIME):
 		for k,v in nodelist.copy().items():
 			if k not in nodelistread:
 				nodelistread.append(k)
@@ -414,13 +412,6 @@ if __name__ == '__main__':
 						threadList.append(pool3.apply_async(check_host_family, (k, v, nodelist, nodelistread)))
 			else:
 				continue
-
-			#explicitly break the loop when the list of nodes found active in the last 8 hours is greater than 9500
-		# 	if(len(nodelist) >= MAX_NODELIST_LENGTH): #break the inner for loop once nodelist exceeds MAX_NODELIST_LENGTH i.e. 9600
-		# 		break 
-		
-		# if(len(nodelist) >= MAX_NODELIST_LENGTH): #break the outer while loop once nodelist exceeds MAX_NODELIST_LENGTH i.e. 9600
-		# 	break 
 
 		if(len(nodelist) == len(nodelistread)):
 			break
