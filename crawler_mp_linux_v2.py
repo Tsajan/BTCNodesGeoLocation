@@ -356,10 +356,10 @@ if __name__ == '__main__':
 	threadList=[]
 	pool = Pool(processes=multiprocessing.cpu_count())
 	pool2 = Pool(processes=100)
-	pool3 = Pool(processes=400)
+	pool3 = Pool(processes=200)
 	maxPool=10;
 	maxPool2=100;
-	maxPool3=400;
+	maxPool3=200;
 	manager =  Manager()
 	nodelist = manager.dict()
 	nodelistread = manager.list()
