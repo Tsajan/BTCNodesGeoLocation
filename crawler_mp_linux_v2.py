@@ -356,10 +356,8 @@ if __name__ == '__main__':
 	threadList=[]
 	pool = Pool(processes=multiprocessing.cpu_count())
 	pool2 = Pool(processes=100)
-	pool3 = Pool(processes=200)
 	maxPool=10;
 	maxPool2=100;
-	maxPool3=200;
 	manager =  Manager()
 	nodelist = manager.dict()
 	nodelistread = manager.list()
@@ -388,7 +386,7 @@ if __name__ == '__main__':
 					else:
 						threadList.append(pool.apply_async(check_host_family, (k, v, nodelist, nodelistread)))
 				# else when there are more than 100 nodes addresses, we do multiprocessing with 100 processes
-				elif((len(nodelist) - len(nodelistread)) >= 100 and (len(nodelist) - len(nodelistread)) <= 400):
+				else:
 					if len(threadList) >= maxPool2:
 						print("********************************************************")
 						print("************THREAD LIST CLEARED*************************")
@@ -399,17 +397,6 @@ if __name__ == '__main__':
 						threadList=[]
 					else:
 						threadList.append(pool2.apply_async(check_host_family, (k, v, nodelist, nodelistread)))
-				else:
-					if len(threadList) >= maxPool3:
-						print("********************************************************")
-						print("************THREAD LIST CLEARED*************************")
-						print("*               "+str(len(threadList))+"               *")
-						print("********************************************************")
-						for x in threadList:
-							x.get()
-						threadList=[]
-					else:
-						threadList.append(pool3.apply_async(check_host_family, (k, v, nodelist, nodelistread)))
 			else:
 				continue
 
