@@ -368,7 +368,7 @@ if __name__ == '__main__':
 	for k,v in seed_nodelist.items():
 		nodelist[k] = v
 
-	END_TIME = time.time() + 960 #run the loop for 16 minutes
+	END_TIME = time.time() + 1200 #run the loop for 20 minutes
 	while(True):
 		for k,v in nodelist.copy().items():
 			if k not in nodelistread:
