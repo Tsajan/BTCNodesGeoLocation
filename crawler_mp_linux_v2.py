@@ -371,7 +371,7 @@ if __name__ == '__main__':
 		nodelist[k] = v
 
 	END_TIME = time.time() + 720 #run the loop for 12 minutes
-	while(time.time() <= END_TIME):
+	while(True):
 		for k,v in nodelist.copy().items():
 			if k not in nodelistread:
 				nodelistread.append(k)
@@ -412,6 +412,12 @@ if __name__ == '__main__':
 						threadList.append(pool3.apply_async(check_host_family, (k, v, nodelist, nodelistread)))
 			else:
 				continue
+
+			if(time.time() >= END_TIME):
+				break
+
+		if(time.time() >= END_TIME):
+			break
 
 		if(len(nodelist) == len(nodelistread)):
 			break
