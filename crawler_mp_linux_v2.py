@@ -400,10 +400,10 @@ if __name__ == '__main__':
 			else:
 				continue
 
-			if(time.time() >= END_TIME):
+			if(len(nodelist) >= 9600):
 				break
 
-		if(time.time() >= END_TIME):
+		if(len(nodelist) >= 9600):
 			break
 
 		if(len(nodelist) == len(nodelistread)):
