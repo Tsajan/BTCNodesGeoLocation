@@ -187,7 +187,7 @@ def sniff_addr_packets(host, port, nodelist, nodelistread):
 						age = int(time.time() - uts)
 						
 						#add the IP address to the nodelist dictionary if it has not been added yet and if it's age in less than 8 hours
-						if (formattedIP not in nodelist) and (age <= 28800) and (serv == '40d'):
+						if (formattedIP not in nodelist) and (age <= 86400) and (serv == '40d'):
 							nodelist[formattedIP] = int(formattedPort)
 							# f.write(formattedIP + "\t" + formattedPort + "\n")
 						# print(f"IP: {formattedIP} \t\t Port: {formattedPort} \t\t Timestamp: {formattedTSString}\n")
